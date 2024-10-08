@@ -1,0 +1,146 @@
+import random
+from copy import deepcopy
+from os import system
+
+global lives
+
+def create_sudoku() -> list[list[list[int]]]:
+    """Creates a sudoku solution and removes all numbers but 25
+
+    Returns:
+        list[int], list[int]: first list is the puzzle and 
+                                   the second is the solution
+    """
+    num = [ n for n in range(1,10)]
+    random.shuffle(num)
+    rows = [ n for n in range(9)]
+    cols = [ n for n in range(9)]
+    solution = [ [ num[(3*(r%3)+r//3+c)%9] for c in cols] for r in rows]
+    board = deepcopy(solution)
+    cords = []
+    for i in range(9):
+        for j in range(9):
+            cords.append([i, j])
+    for p in random.sample(cords, 56):
+        board[p[0]][p[1]] = 0
+    return board, solution
+
+def position(coordinate : list[int], board : list[list[int]], 
+             solution : list[list[int]]) -> list[list[int]]:
+    """Takes the coordinate, gets an input for the value checks if the
+        value is correct, if not removes a life and if lives hit zero 
+        the game ends and the program shuts of
+
+    Args:
+        coordinate (list[int]): coordinates for the value
+        board (list[list[int]]): playing board
+        solution (list[list[int]]): solution used to check the value
+
+    return:
+        list[list[int]]: returns the board
+    """
+    global lives
+    while True:
+        system('cls')
+        print("  " + '\033[4m' + " 1 2 3 4 5 6 7 8 9")
+        for line in board:
+            print("\033[0m" + str(board.index(line) + 1), end=" \033[4m|")
+            for n in line:
+                if n == 0:
+                    print("\u0332" .join("-"), end="|")
+                else:
+                    print("\u0332" .join(str(n)), end="|")
+            print()
+        print('\033[0m')
+        print("write 0 to go back")
+        num = input(f"what number do you want to have at {coordinate}: ")
+        try:
+            l = int(num)
+        except ValueError:
+            print("you need to input a number")
+            input("press enter to continue")
+            continue
+        num = int(num)
+        if 0 > num or num > 9:
+            print("you need to write a number between 0 and 9")
+            input("press enter to continue")
+        else:
+            if num == 0:
+                return board
+            else:
+                if num == solution[coordinate[0] - 1][coordinate[1] - 1]:
+                    board[coordinate[0] - 1][coordinate[1] - 1] = num
+                    return board
+                else:
+                    lives -= 1
+                    print("you have lost a life")
+                    print(f"you now have {lives} lives left")
+                    if lives == 0:
+                        print("you lost")
+                        exit()
+                    input("press enter to continue")
+
+def playing(board : list[list[int]], solution : list[list[int]]):
+    """Is used as the main function for playing the game 
+    like what position you want to put a number in
+
+    Args:
+        board (list[list[int]]): the board that the player can see
+        solution (list[list[int]]): the solution
+    """
+    while True:
+        system('cls')
+        if board == solution:
+            print("you won congratulations!!")
+            exit()
+        print("  " + '\033[4m' + " 1 2 3 4 5 6 7 8 9")
+        for line in board:
+            print("\033[0m" + str(board.index(line) + 1), end=" \033[4m|")
+            for n in line:
+                if n == 0:
+                    print("\u0332" .join("-"), end="|")
+                else:
+                    print("\u0332" .join(str(n)), end="|")
+            print()
+        print('\033[0m')
+        print(f"you have {lives} lives")
+        print("Write the row number and column number")
+        coordinate = (input("for the position that you want to write on: ")
+                      .split(" "))
+        try:
+            for i in coordinate:
+                t = int(i)
+        except ValueError:
+            print("you need to write numbers")
+            input("press enter to continue")
+            continue
+        coordinate[0] = int(coordinate[0])
+        coordinate[1] = int(coordinate[1])
+        if coordinate[0] in range(1, 10) and coordinate[1] in range(1, 10):
+            if board[coordinate[0] - 1][coordinate[1] - 1] == 0:
+                board = position(coordinate, board, solution)
+            else:
+                print("you already have the correct value for this position")
+                input("press enter to continue")
+        else:
+            print("you need to write numbers between 1 and 9")
+            input("press enter to continue")
+        
+while True:
+    board, solution = create_sudoku()
+    while True:
+        system('cls')
+        lives = input("how many lives do you want to have: ")
+        try:
+            l = int(lives)
+        except ValueError:
+            print("you need to write a number")
+            input("press enter to continue")
+            continue
+        lives = int(lives)
+        if lives < 1:
+            print("you need to have one or more lives")
+            input("press enter to continue")
+        else:
+            break
+    playing(board, solution)
