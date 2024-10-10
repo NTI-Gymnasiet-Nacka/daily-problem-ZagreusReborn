@@ -126,7 +126,7 @@ def playing(board : list[list[int]], solution : list[list[int]]):
             print("you need to write numbers between 1 and 9")
             input("press enter to continue")
         
-while True:
+if __name__ == "__main__":
     board, solution = create_sudoku()
     while True:
         system('cls')
